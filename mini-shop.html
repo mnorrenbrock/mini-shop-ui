@@ -4,11 +4,53 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Schreibwaren Nord — Mini-Shop</title>
+<style>
+  body { margin: 0; font-family: system-ui, sans-serif; background: #EFEAE0; color: #20241F; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.1rem; padding: 1.5rem; }
+  .card { border: 1px solid rgba(0,0,0,0.14); border-radius: 2px; padding: 1rem; display: flex; flex-direction: column; gap: .6rem; }
+  .swatch { height: 90px; border-radius: 2px; }
+  .card h3 { margin: 0; font-size: 1.05rem; }
+  .card .price { font-size: .85rem; color: #2B3A55; font-weight: 600; }
+  .card .stock { font-size: .78rem; opacity: .65; }
+</style>
 </head>
 <body>
 
+<div class="grid" id="grid"></div>
+
 <script>
-  console.log("Projektgerüst geladen.");
+  // Produktdaten — zentral gepflegt (Issue 2)
+  const products = [
+    { id: 1, name: "Notizbuch Leinen A5",  price: 12.50, color: "#7C8F73", desc: "Fadengeheftetes A5-Notizbuch mit Leinenbezug, 160 Seiten liniert.", stock: 14 },
+    { id: 2, name: "Füllfederhalter Slim", price: 34.00, color: "#2B3A55", desc: "Schlanker Füllfederhalter aus gebürstetem Aluminium, Feder Größe M.", stock: 6 },
+    { id: 3, name: "Tuschestifte Set (6)", price: 9.90,  color: "#C98A3E", desc: "Sechs Fineliner in Sepia-Tönen, wasserfest, 0.3mm Spitze.", stock: 0 },
+    { id: 4, name: "Schreibtischlampe",    price: 48.00, color: "#8A6E4B", desc: "Dimmbare LED-Tischlampe mit warmweißem Licht, USB-C Anschluss.", stock: 3 },
+    { id: 5, name: "Keramiktasse 'Nord'",  price: 16.00, color: "#4A5A4E", desc: "Handgedrehte Keramiktasse, 300ml, matte Glasur in Moosgrün.", stock: 9 },
+  ];
+
+  const grid = document.getElementById('grid');
+
+  function fmt(p) {
+    return p.toLocaleString('de-DE', { minimumFractionDigits: 2 }) + ' €';
+  }
+
+  // Listenansicht rendern (Issue 3) — Klick-Funktion folgt erst in Issue 4
+  function renderGrid() {
+    grid.innerHTML = '';
+    products.forEach(p => {
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="swatch" style="background:${p.color}"></div>
+        <h3>${p.name}</h3>
+        <span class="price">${fmt(p.price)}</span>
+        <span class="stock">${p.stock > 0 ? p.stock + ' auf Lager' : 'Ausverkauft'}</span>
+      `;
+      grid.appendChild(card);
+    });
+  }
+
+  renderGrid();
 </script>
 </body>
 </html>
