@@ -8,7 +8,16 @@
 <body>
 
 <script>
-  console.log("Projektgerüst geladen.");
+  // Produktdaten — zentral gepflegt, noch nicht gerendert (folgt in Issue 3)
+  const products = [
+    { id: 1, name: "Notizbuch Leinen A5",  price: 12.50, color: "#7C8F73", desc: "Fadengeheftetes A5-Notizbuch mit Leinenbezug, 160 Seiten liniert.", stock: 14 },
+    { id: 2, name: "Füllfederhalter Slim", price: 34.00, color: "#2B3A55", desc: "Schlanker Füllfederhalter aus gebürstetem Aluminium, Feder Größe M.", stock: 6 },
+    { id: 3, name: "Tuschestifte Set (6)", price: 9.90,  color: "#C98A3E", desc: "Sechs Fineliner in Sepia-Tönen, wasserfest, 0.3mm Spitze.", stock: 0 },
+    { id: 4, name: "Schreibtischlampe",    price: 48.00, color: "#8A6E4B", desc: "Dimmbare LED-Tischlampe mit warmweißem Licht, USB-C Anschluss.", stock: 3 },
+    { id: 5, name: "Keramiktasse 'Nord'",  price: 16.00, color: "#4A5A4E", desc: "Handgedrehte Keramiktasse, 300ml, matte Glasur in Moosgrün.", stock: 9 },
+  ];
+
+  console.log("Produktdaten geladen:", products);
 </script>
 </body>
 </html>
