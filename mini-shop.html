@@ -19,7 +19,7 @@
 <div class="grid" id="grid"></div>
 
 <script>
-  // Produktdaten — zentral gepflegt (Issue 2)
+  // Produktdaten — zentral gepflegt, noch nicht gerendert (folgt in Issue 3)
   const products = [
     { id: 1, name: "Notizbuch Leinen A5",  price: 12.50, color: "#7C8F73", desc: "Fadengeheftetes A5-Notizbuch mit Leinenbezug, 160 Seiten liniert.", stock: 14 },
     { id: 2, name: "Füllfederhalter Slim", price: 34.00, color: "#2B3A55", desc: "Schlanker Füllfederhalter aus gebürstetem Aluminium, Feder Größe M.", stock: 6 },
@@ -28,29 +28,7 @@
     { id: 5, name: "Keramiktasse 'Nord'",  price: 16.00, color: "#4A5A4E", desc: "Handgedrehte Keramiktasse, 300ml, matte Glasur in Moosgrün.", stock: 9 },
   ];
 
-  const grid = document.getElementById('grid');
-
-  function fmt(p) {
-    return p.toLocaleString('de-DE', { minimumFractionDigits: 2 }) + ' €';
-  }
-
-  // Listenansicht rendern (Issue 3) — Klick-Funktion folgt erst in Issue 4
-  function renderGrid() {
-    grid.innerHTML = '';
-    products.forEach(p => {
-      const card = document.createElement('div');
-      card.className = 'card';
-      card.innerHTML = `
-        <div class="swatch" style="background:${p.color}"></div>
-        <h3>${p.name}</h3>
-        <span class="price">${fmt(p.price)}</span>
-        <span class="stock">${p.stock > 0 ? p.stock + ' auf Lager' : 'Ausverkauft'}</span>
-      `;
-      grid.appendChild(card);
-    });
-  }
-
-  renderGrid();
+  console.log("Produktdaten geladen:", products);
 </script>
 </body>
 </html>
