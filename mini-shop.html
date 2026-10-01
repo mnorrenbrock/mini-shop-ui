@@ -19,6 +19,41 @@
 <div class="grid" id="grid"></div>
 
 <script>
+<style>
+  body { margin: 0; font-family: system-ui, sans-serif; background: #EFEAE0; color: #20241F; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.1rem; padding: 1.5rem; }
+  .card { border: 1px solid rgba(0,0,0,0.14); border-radius: 2px; padding: 1rem; display: flex; flex-direction: column; gap: .6rem; cursor: pointer; background: none; text-align: left; font-family: inherit; color: inherit; }
+  .swatch { height: 90px; border-radius: 2px; }
+  .card h3 { margin: 0; font-size: 1.05rem; }
+  .card .price { font-size: .85rem; color: #2B3A55; font-weight: 600; }
+  .card .stock { font-size: .78rem; opacity: .65; }
+
+  .overlay { position: fixed; inset: 0; background: rgba(20,22,18,.55); display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity .15s ease; }
+  .overlay.open { opacity: 1; pointer-events: auto; }
+  .modal { background: #EFEAE0; max-width: 420px; width: 100%; border-radius: 3px; padding: 1.6rem; position: relative; border: 1px solid rgba(0,0,0,0.14); }
+  .modal .swatch { height: 120px; margin-bottom: 1rem; }
+  .modal h2 { margin: 0 0 .3rem; font-size: 1.3rem; }
+  .modal .price { color: #2B3A55; font-weight: 700; display: block; margin-bottom: .8rem; }
+  .modal p.desc { line-height: 1.5; margin: 0; font-size: .95rem; }
+  .modal button.close { position: absolute; top: .8rem; right: .8rem; background: none; border: none; font-size: 1.3rem; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div class="grid" id="grid"></div>
+
+<div class="overlay" id="overlay">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button class="close" id="closeBtn" aria-label="Schließen">✕</button>
+    <div class="swatch" id="modalSwatch"></div>
+    <h2 id="modalTitle"></h2>
+    <span class="price" id="modalPrice"></span>
+    <p class="desc" id="modalDesc"></p>
+  </div>
+</div>
+
+<script>
+  // Produktdaten — zentral gepflegt (Issue 2)
   // Produktdaten — zentral gepflegt, noch nicht gerendert (folgt in Issue 3)
   const products = [
     { id: 1, name: "Notizbuch Leinen A5",  price: 12.50, color: "#7C8F73", desc: "Fadengeheftetes A5-Notizbuch mit Leinenbezug, 160 Seiten liniert.", stock: 14 },
@@ -28,6 +63,60 @@
     { id: 5, name: "Keramiktasse 'Nord'",  price: 16.00, color: "#4A5A4E", desc: "Handgedrehte Keramiktasse, 300ml, matte Glasur in Moosgrün.", stock: 9 },
   ];
 
+  const grid = document.getElementById('grid');
+  const overlay = document.getElementById('overlay');
+  const modalSwatch = document.getElementById('modalSwatch');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalPrice = document.getElementById('modalPrice');
+  const modalDesc = document.getElementById('modalDesc');
+  const closeBtn = document.getElementById('closeBtn');
+
+  let lastFocused = null;
+
+  function fmt(p) {
+    return p.toLocaleString('de-DE', { minimumFractionDigits: 2 }) + ' €';
+  }
+
+  // Listenansicht rendern (Issue 3)
+  function renderGrid() {
+    grid.innerHTML = '';
+    products.forEach(p => {
+      const card = document.createElement('button');
+      card.className = 'card';
+      card.innerHTML = `
+        <div class="swatch" style="background:${p.color}"></div>
+        <h3>${p.name}</h3>
+        <span class="price">${fmt(p.price)}</span>
+        <span class="stock">${p.stock > 0 ? p.stock + ' auf Lager' : 'Ausverkauft'}</span>
+      `;
+      card.addEventListener('click', () => openModal(p));
+      grid.appendChild(card);
+    });
+  }
+
+  // Detailmodal (Issue 4)
+  function openModal(p) {
+    lastFocused = document.activeElement;
+    modalSwatch.style.background = p.color;
+    modalTitle.textContent = p.name;
+    modalPrice.textContent = fmt(p.price);
+    modalDesc.textContent = p.desc;
+    overlay.classList.add('open');
+    closeBtn.focus();
+  }
+
+  function closeModal() {
+    overlay.classList.remove('open');
+    if (lastFocused) lastFocused.focus();
+  }
+
+  closeBtn.addEventListener('click', closeModal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && overlay.classList.contains('open')) closeModal();
+  });
+
+  renderGrid();
   console.log("Produktdaten geladen:", products);
 </script>
 </body>
