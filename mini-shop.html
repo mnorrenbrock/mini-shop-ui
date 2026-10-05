@@ -6,48 +6,47 @@
 <title>Schreibwaren Nord — Mini-Shop</title>
 <style>
   body { margin: 0; font-family: system-ui, sans-serif; background: #EFEAE0; color: #20241F; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.1rem; padding: 1.5rem; }
-  .card { border: 1px solid rgba(0,0,0,0.14); border-radius: 2px; padding: 1rem; display: flex; flex-direction: column; gap: .6rem; }
-  .swatch { height: 90px; border-radius: 2px; }
-  .card h3 { margin: 0; font-size: 1.05rem; }
-  .card .price { font-size: .85rem; color: #2B3A55; font-weight: 600; }
-  .card .stock { font-size: .78rem; opacity: .65; }
-</style>
-</head>
-<body>
-
-<div class="grid" id="grid"></div>
-
-<script>
-<style>
-  body { margin: 0; font-family: system-ui, sans-serif; background: #EFEAE0; color: #20241F; }
+  h1 { font-size: 1.4rem; padding: 1.5rem 1.5rem 0; margin: 0; }
   .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1.1rem; padding: 1.5rem; }
   .card { border: 1px solid rgba(0,0,0,0.14); border-radius: 2px; padding: 1rem; display: flex; flex-direction: column; gap: .6rem; cursor: pointer; background: none; text-align: left; font-family: inherit; color: inherit; }
   .swatch { height: 90px; border-radius: 2px; }
   .card h3 { margin: 0; font-size: 1.05rem; }
   .card .price { font-size: .85rem; color: #2B3A55; font-weight: 600; }
-  .card .stock { font-size: .78rem; opacity: .65; }
+  .card .stock { font-size: .85rem; color: #46493f; }
+
+  .card:focus-visible,
+  .close:focus-visible { outline: 3px solid #C98A3E; outline-offset: 2px; }
 
   .overlay { position: fixed; inset: 0; background: rgba(20,22,18,.55); display: flex; align-items: center; justify-content: center; padding: 1rem; opacity: 0; pointer-events: none; transition: opacity .15s ease; }
   .overlay.open { opacity: 1; pointer-events: auto; }
   .modal { background: #EFEAE0; max-width: 420px; width: 100%; border-radius: 3px; padding: 1.6rem; position: relative; border: 1px solid rgba(0,0,0,0.14); }
   .modal .swatch { height: 120px; margin-bottom: 1rem; }
   .modal h2 { margin: 0 0 .3rem; font-size: 1.3rem; }
-  .modal .price { color: #2B3A55; font-weight: 700; display: block; margin-bottom: .8rem; }
+  .modal .price { color: #2B3A55; font-weight: 700; display: block; margin-bottom: .3rem; }
+  .modal .stock { display: block; font-size: .85rem; color: #46493f; margin-bottom: .8rem; }
   .modal p.desc { line-height: 1.5; margin: 0; font-size: .95rem; }
   .modal button.close { position: absolute; top: .8rem; right: .8rem; background: none; border: none; font-size: 1.3rem; cursor: pointer; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .overlay { transition: none; }
+  }
 </style>
 </head>
 <body>
 
-<div class="grid" id="grid"></div>
+<h1>Schreibwaren Nord</h1>
+
+<main>
+  <div class="grid" id="grid"></div>
+</main>
 
 <div class="overlay" id="overlay">
-  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal" id="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" aria-describedby="modalDesc">
     <button class="close" id="closeBtn" aria-label="Schließen">✕</button>
-    <div class="swatch" id="modalSwatch"></div>
+    <div class="swatch" id="modalSwatch" aria-hidden="true"></div>
     <h2 id="modalTitle"></h2>
     <span class="price" id="modalPrice"></span>
+    <span class="stock" id="modalStock"></span>
     <p class="desc" id="modalDesc"></p>
   </div>
 </div>
@@ -63,9 +62,11 @@
 
   const grid = document.getElementById('grid');
   const overlay = document.getElementById('overlay');
+  const modal = document.getElementById('modal');
   const modalSwatch = document.getElementById('modalSwatch');
   const modalTitle = document.getElementById('modalTitle');
   const modalPrice = document.getElementById('modalPrice');
+  const modalStock = document.getElementById('modalStock');
   const modalDesc = document.getElementById('modalDesc');
   const closeBtn = document.getElementById('closeBtn');
 
@@ -75,14 +76,13 @@
     return p.toLocaleString('de-DE', { minimumFractionDigits: 2 }) + ' €';
   }
 
-  // Listenansicht rendern (Issue 3)
   function renderGrid() {
     grid.innerHTML = '';
     products.forEach(p => {
       const card = document.createElement('button');
       card.className = 'card';
       card.innerHTML = `
-        <div class="swatch" style="background:${p.color}"></div>
+        <div class="swatch" style="background:${p.color}" aria-hidden="true"></div>
         <h3>${p.name}</h3>
         <span class="price">${fmt(p.price)}</span>
         <span class="stock">${p.stock > 0 ? p.stock + ' auf Lager' : 'Ausverkauft'}</span>
@@ -92,20 +92,34 @@
     });
   }
 
-  // Detailmodal (Issue 4)
   function openModal(p) {
     lastFocused = document.activeElement;
     modalSwatch.style.background = p.color;
     modalTitle.textContent = p.name;
     modalPrice.textContent = fmt(p.price);
+    modalStock.textContent = p.stock > 0 ? p.stock + ' auf Lager' : 'Ausverkauft';
     modalDesc.textContent = p.desc;
     overlay.classList.add('open');
     closeBtn.focus();
+    document.addEventListener('keydown', trapFocus);
   }
 
   function closeModal() {
     overlay.classList.remove('open');
+    document.removeEventListener('keydown', trapFocus);
     if (lastFocused) lastFocused.focus();
+  }
+
+  function trapFocus(e) {
+    if (e.key !== 'Tab') return;
+    const focusable = modal.querySelectorAll('button');
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault(); last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault(); first.focus();
+    }
   }
 
   closeBtn.addEventListener('click', closeModal);
